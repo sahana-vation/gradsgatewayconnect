@@ -13,9 +13,9 @@ class PrivacyPolicyScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildSectionHeader("Effective Date: December 04, 2024"),
-            _buildSectionHeader("Grads  Connect Privacy Policy"),
+            _buildSectionHeader("Grads Gateway Privacy Policy"),
             _buildText(
-                "This privacy policy applies to the Grads  Connect app (hereby referred to as \"Application\") for mobile devices that was created by Grads Gateway (hereby referred to as \"Service Provider\") as a Free service. This service is intended for use \"AS IS\"."
+                "This privacy policy applies to the Grads Gateway app (hereby referred to as \"Application\") for mobile devices that was created by Grads Gateway (hereby referred to as \"Service Provider\") as a Free service. This service is intended for use \"AS IS\"."
             ),
 
             _buildSectionHeader("Information Collection and Use"),
