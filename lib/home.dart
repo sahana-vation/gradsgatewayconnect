@@ -162,8 +162,8 @@ class _HomeScreenState extends State<HomeScreen> {
         backgroundColor: Colors.white,
         title: SvgPicture.asset(
           'assets/icon/gg logo.svg',
-          width: 32,
-          height: 32,
+          width: 40,
+          height: 40,
         ),
         centerTitle: true,
         leading: Builder(
@@ -184,9 +184,7 @@ class _HomeScreenState extends State<HomeScreen> {
               child: Center(
                 child: Column(
                   children: [
-                    SizedBox(height: 20,),
                     Icon(Icons.person,color: Colors.white,),
-                    SizedBox(height: 05,),
                     Text(
                       widget.name ?? "User",
                       style: TextStyle(color: Colors.white, fontSize: 20),
@@ -358,13 +356,14 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   SizedBox(height: 20,),
                   Text(
-                    'Click submit referral to refer a\n friend and earn rewards!!!',
+                    'Click Apply Now to refer a\n friend and earn rewards!!!',
                     style: TextStyle(
                       fontSize: 12,
                       color:  Color(0xFF000000)..withOpacity(0.8),
                       fontWeight: FontWeight.w400,
                       fontFamily: 'Poppins', // Use Poppins font family
                     ),// Text color
+
                   ),
                   SizedBox(height: 10,),
                   GestureDetector(
@@ -425,7 +424,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                         ),
                         child: Text(
-                          'Submit Referral',
+                          'Apply Now',
                           style: TextStyle(
                             fontSize: 16,
                             color: Colors.white,
