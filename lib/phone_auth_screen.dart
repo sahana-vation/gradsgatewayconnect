@@ -144,8 +144,8 @@ class _PhoneAuthScreenState extends State<PhoneAuthScreen> {
         backgroundColor: Colors.white,
         title: SvgPicture.asset(
           'assets/icon/gg logo.svg',
-          width: 32,
-          height: 32,
+          width: 40,
+          height: 40,
         ),
         centerTitle: true,
       ),

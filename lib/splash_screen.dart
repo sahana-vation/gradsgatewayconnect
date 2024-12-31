@@ -48,8 +48,8 @@ class _SplashScreenState extends State<SplashScreen> {
         backgroundColor: Colors.white,
         title: SvgPicture.asset(
           'assets/icon/gg logo.svg',
-          width: 32,
-          height: 32,
+          width: 40,
+          height: 40,
         ),
         centerTitle: true,
       ),
@@ -73,7 +73,7 @@ class _SplashScreenState extends State<SplashScreen> {
               ),
               const SizedBox(height: 10),
               Image.asset(
-                'assets/icon/Rectangle 69 (1).png',
+                'assets/icon/Group 24.png',
                 width: screenSize.width,
                 height: screenSize.height * 0.5,
                 fit: BoxFit.cover,
@@ -93,7 +93,7 @@ class _SplashScreenState extends State<SplashScreen> {
                       ),
                     ),
                     child: const Text(
-                      'Get Started',
+                      'Sign In ',
                       style: TextStyle(
                         fontSize: 16,
                         color: Colors.white,
