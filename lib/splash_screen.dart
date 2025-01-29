@@ -1,6 +1,9 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:gradsgatewayconnect/privacy_policy_screen.dart';
+import 'package:gradsgatewayconnect/sign_up_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'home.dart';
 import 'phone_auth_screen.dart';
@@ -18,21 +21,23 @@ class _SplashScreenState extends State<SplashScreen> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? storedPhoneNumber = prefs.getString('phoneNumber');
     String? storedName = prefs.getString('name');
+    log('Retrieved phoneNumber: ${prefs.getString('phoneNumber')}');
+    log('Retrieved name: ${prefs.getString('name')}');
 
-    if (storedPhoneNumber != null && storedName != null) {
+    if (storedPhoneNumber != null || storedName != null) {
       // User is already logged in, navigate to Home
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
           builder: (context) => HomeScreen(
-            phoneNumber: storedPhoneNumber,
+            phoneNumber: storedPhoneNumber.toString(),
             name: storedName,
           ),
         ),
       );
     } else {
       // New user, navigate to PhoneAuthScreen for sign-up/login
-      Navigator.pushReplacement(
+      Navigator.push(
         context,
         MaterialPageRoute(builder: (context) => PhoneAuthScreen()),
       );
@@ -45,7 +50,7 @@ class _SplashScreenState extends State<SplashScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFE1F5FE),
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: const Color(0xFFE1F5FE),
         title: SvgPicture.asset(
           'assets/icon/gg logo.svg',
           width: 40,
@@ -61,13 +66,15 @@ class _SplashScreenState extends State<SplashScreen> {
             children: [
               const Padding(
                 padding: EdgeInsets.only(left: 5),
-                child: Text(
-                  'Welcome to Grads\nGateway!',
-                  style: TextStyle(
-                    fontSize: 22,
-                    color: Color(0xFF000000),
-                    fontWeight: FontWeight.w500,
-                    fontFamily: 'Poppins',
+                child: Center(
+                  child: Text(
+                    'Welcome to Grads Gateway!',
+                    style: TextStyle(
+                      fontSize: 18,
+                      color: Color(0xFF000000),
+                      fontWeight: FontWeight.w500,
+                      fontFamily: 'Poppins',
+                    ),
                   ),
                 ),
               ),
@@ -78,7 +85,7 @@ class _SplashScreenState extends State<SplashScreen> {
                 height: screenSize.height * 0.5,
                 fit: BoxFit.cover,
               ),
-              const SizedBox(height: 45),
+              const SizedBox(height: 24),
               SizedBox(
                 width: double.infinity,
                 child: Padding(
@@ -97,6 +104,40 @@ class _SplashScreenState extends State<SplashScreen> {
                       style: TextStyle(
                         fontSize: 16,
                         color: Colors.white,
+                        fontFamily: 'Poppins',
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+
+              SizedBox(
+                width: double.infinity,
+                child: Padding(
+                  padding: const EdgeInsets.all(10.0),
+                  child: ElevatedButton(
+                    onPressed: (){
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => SignUpScreen(
+                          ),
+                        ),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFFE1F5FE),
+                      padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 40),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        side: const BorderSide(color: Colors.black, width: 2),
+                      ),
+                    ),
+                    child: const Text(
+                      'Sign Up ',
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.black,
                         fontFamily: 'Poppins',
                       ),
                     ),

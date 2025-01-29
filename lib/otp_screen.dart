@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -7,10 +9,10 @@ import 'home.dart';
 
 class OtpScreen extends StatefulWidget {
   final String phone;
-  final String name;
+
   final String? sentOtp;
 
-  OtpScreen({required this.phone, required this.name, this.sentOtp});
+  OtpScreen({required this.phone,  this.sentOtp});
 
   @override
   _OtpScreenState createState() => _OtpScreenState();
@@ -49,29 +51,60 @@ class _OtpScreenState extends State<OtpScreen> with CodeAutoFill {
     super.dispose();
   }
 
+
+
   Future<void> verifyOtp() async {
     final otp = _otpController.text.trim();
+
+    // Validate OTP length
     if (otp.isEmpty || otp.length != 4) {
       _showErrorDialog('Please enter a valid OTP');
       return;
     }
 
+    final sentOtp = widget.sentOtp; // Server-sent OTP in response as a string
+
+    if (sentOtp == null || sentOtp.isEmpty) {
+      _showErrorDialog('Invalid OTP received from the server.');
+      return;
+    }
+
+    // Manually fix the invalid JSON format if necessary
+    String fixedResponse = sentOtp.replaceAllMapped(
+        RegExp(r'(\w+):'),
+            (match) => '"${match.group(1)}":');  // Add quotes around keys
+
+    // Parse the fixed JSON response
+    Map<String, dynamic> otpResponse;
+    try {
+      otpResponse = json.decode(fixedResponse); // Decode the fixed JSON
+    } catch (e) {
+      _showErrorDialog('Failed to parse OTP response: $e');
+      return;
+    }
+
+    final serverOtp = otpResponse['otp'].toString(); // Extract and convert OTP to string
+
+    // Debug: Print the OTPs being compared
+    debugPrint('Entered OTP: $otp');
+    debugPrint('Sent OTP: $serverOtp');
+
     setState(() {
       _isVerifyingOtp = true;
     });
 
-    if (otp == widget.sentOtp) {
+    // Compare the entered OTP (string) with the server-sent OTP (converted to string)
+    if (otp == serverOtp) {
       debugPrint('OTP Verified Successfully');
-
       SharedPreferences prefs = await SharedPreferences.getInstance();
       await prefs.setString('phoneNumber', widget.phone);
-      await prefs.setString('name', widget.name);
+    //  await prefs.setString('name', widget.name);
 
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
           builder: (context) => HomeScreen(
-            name: widget.name,
+           // name: widget.name,
             phoneNumber: widget.phone,
           ),
         ),
@@ -84,6 +117,8 @@ class _OtpScreenState extends State<OtpScreen> with CodeAutoFill {
       _isVerifyingOtp = false;
     });
   }
+
+
 
   void _showErrorDialog(String message) {
     showDialog(
@@ -110,7 +145,7 @@ class _OtpScreenState extends State<OtpScreen> with CodeAutoFill {
     return Scaffold(
       backgroundColor: Color(0xFFE1F5FE),
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: Color(0xFFE1F5FE),
         title: SvgPicture.asset(
           'assets/icon/gg logo.svg',
           width: 40,
@@ -132,11 +167,12 @@ class _OtpScreenState extends State<OtpScreen> with CodeAutoFill {
                   codeLength: 4, // Number of OTP digits
                   focusNode: _otpFocusNode, // Assign the focus node to the field
                   onCodeChanged: (code) {
-                    if (code?.length == 4) {
-                      debugPrint('Entered OTP: $code');
-                      verifyOtp(); // Automatically verify once all digits are entered
+                    if (code?.trim().length == 4) {
+                      debugPrint('Entered OTP: ${code?.trim()}');
+                      verifyOtp();
                     }
                   },
+
                   decoration: BoxLooseDecoration(
                     strokeWidth: 1,
                     gapSpace: 10,

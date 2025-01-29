@@ -75,11 +75,8 @@ class PrivacyPolicyScreen extends StatelessWidget {
             _buildBulletPoint("If you are unable to delete your account via the app, you may contact our support team at contact@gradsgateway.com ."),
             _buildBulletPoint("Include your registered mobile number and a request for account deletion."),
 
-            _buildText("Upon account deletion:"),
-            _buildBulletPoint("All your personal data, including your profile information, will be permanently erased from our systems, except as required to comply with legal obligations or resolve disputes."),
-            _buildBulletPoint("Some anonymized data may be retained for analytical purposes, but it will no longer be linked to your account."),
-            _buildBulletPoint("It might take up to 7 working days to delete your personal data."),
-            _buildBulletPoint("You will get an SMS with the Account deletion Service Request No. Please keep this for reference in case you would like to contact us for more information on the request status."),
+
+            _buildText("Upon account deletion, all your personal data, including your profile information, will be permanently erased from our systems, except as required to comply with legal obligations or resolve disputes."),
             _buildText("If you have any questions about account deletion, feel free to contact us at contact@gradsgateway.com."),
 
 

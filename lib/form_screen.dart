@@ -19,9 +19,12 @@ class FormScreen extends StatefulWidget {
 
 class _FormScreenState extends State<FormScreen> {
   final _formKey = GlobalKey<FormState>();
-  final TextEditingController _candidateNameController = TextEditingController();
-  final TextEditingController _candidatePhoneController = TextEditingController();
-  final TextEditingController _candidateEmailController = TextEditingController();
+  final TextEditingController _candidateNameController =
+      TextEditingController();
+  final TextEditingController _candidatePhoneController =
+      TextEditingController();
+  final TextEditingController _candidateEmailController =
+      TextEditingController();
   final TextEditingController _messageController = TextEditingController();
 
   bool isOverseasAdmissionChecked = false;
@@ -29,33 +32,28 @@ class _FormScreenState extends State<FormScreen> {
   bool isLoading = false; // For showing loading indicator
   Timer? _inactivityTimer;
 
-  // Function to log the user out by clearing the session
-  void _logoutAndNavigateToLogin(BuildContext context) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.clear(); // Clear stored data (name and phone number)
-
-    // Navigate to PhoneAuthScreen
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (context) => PhoneAuthScreen()),
-    );
-  }
   @override
   void initState() {
     super.initState();
     _startInactivityTimer();
   }
+
   // Start a timer to detect inactivity after 20 seconds
   void _startInactivityTimer() {
     _inactivityTimer?.cancel(); // Cancel any previous timer
     _inactivityTimer = Timer(Duration(seconds: 20), () {
       // Show a message and navigate to HomeScreen
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('You have been inactive for more than 20 seconds')),
+        SnackBar(
+            content: Text('You have been inactive for more than 20 seconds')),
       );
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => HomeScreen(phoneNumber: widget.phoneNumber,name: widget.name,)), // Replace with your HomeScreen
+        MaterialPageRoute(
+            builder: (context) => HomeScreen(
+                  phoneNumber: widget.phoneNumber,
+                  name: widget.name,
+                )), // Replace with your HomeScreen
       );
     });
   }
@@ -64,7 +62,6 @@ class _FormScreenState extends State<FormScreen> {
   void _resetInactivityTimer() {
     _startInactivityTimer();
   }
-
 
   // Function to send the referral data to the API
   Future<void> _submitReferral() async {
@@ -94,7 +91,6 @@ class _FormScreenState extends State<FormScreen> {
         'Email': _candidateEmailController.text,
         'MobileNumber': _candidatePhoneController.text,
         'Message': _messageController.text,
-        'ReferrerName': widget.name ?? 'Unknown',
         'ReferrerNumber': widget.phoneNumber,
         'Source': "MobileAPK",
       };
@@ -116,12 +112,13 @@ class _FormScreenState extends State<FormScreen> {
               builder: (BuildContext context) {
                 return AlertDialog(
                   title: Text('Success'),
-                  content: Text('Thank you for Reference Submission.'),
+                  content: Text('Your Application has been submitted successfully.'),
                   actions: [
                     TextButton(
                       child: Text('Close'),
                       onPressed: () {
                         Navigator.of(context).pop(); // Close the dialog
+                        Navigator.of(context).pop();
                       },
                     ),
                   ],
@@ -131,12 +128,16 @@ class _FormScreenState extends State<FormScreen> {
             _clearFormFields();
           } else {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Unexpected response: ${responseBody['Message']}')),
+              SnackBar(
+                  content:
+                      Text('Unexpected response: ${responseBody['Message']}')),
             );
           }
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Failed to generate lead. Status code: ${response.statusCode}')),
+            SnackBar(
+                content: Text(
+                    'Failed to generate lead. Status code: ${response.statusCode}')),
           );
         }
       } catch (e) {
@@ -164,12 +165,13 @@ class _FormScreenState extends State<FormScreen> {
 
   @override
   Widget build(BuildContext context) {
+    print('Name: ${widget.name}');
     return GestureDetector(
       onTap: _resetInactivityTimer,
       child: Scaffold(
-        backgroundColor:  Color(0xFFE1F5FE),
+        backgroundColor: Color(0xFFE1F5FE),
         appBar: AppBar(
-          backgroundColor: Colors.white,
+          backgroundColor: Color(0xFFE1F5FE),
           title: SvgPicture.asset(
             'assets/icon/gg logo.svg',
             width: 40,
@@ -184,41 +186,41 @@ class _FormScreenState extends State<FormScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  SizedBox(
-                    width: double.infinity,
-                    child: Card(
-                      color: Color(0xFF0FB7C6),
-                      elevation: 4,
-                      child: Padding(
-                        padding: const EdgeInsets.all(10.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              widget.name != null && widget.name!.isNotEmpty
-                                  ? '${widget.name}'
-                                  : '',
-                              style: TextStyle(
-                                fontSize: 20,
-                                color: Color(0xFFFFFFFF).withOpacity(0.8),
-                                fontWeight: FontWeight.w500,
-                                fontFamily: 'Poppins',
-                              ),
-                            ),
-                            Text(
-                              '${widget.phoneNumber}',
-                              style: TextStyle(
-                                fontSize: 13,
-                                color: Color(0xFF000000).withOpacity(0.8),
-                                fontWeight: FontWeight.w500,
-                                fontFamily: 'Poppins',
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
+                  // SizedBox(
+                  //   width: double.infinity,
+                  //   child: Card(
+                  //     color: Color(0xFF0FB7C6),
+                  //     elevation: 4,
+                  //     child: Padding(
+                  //       padding: const EdgeInsets.all(10.0),
+                  //       child: Column(
+                  //         crossAxisAlignment: CrossAxisAlignment.start,
+                  //         children: [
+                  //           Text(
+                  //             widget.name != null && widget.name!.isNotEmpty
+                  //                 ? '${widget.name}'
+                  //                 : '',
+                  //             style: TextStyle(
+                  //               fontSize: 20,
+                  //               color: Color(0xFFFFFFFF).withOpacity(0.8),
+                  //               fontWeight: FontWeight.w500,
+                  //               fontFamily: 'Poppins',
+                  //             ),
+                  //           ),
+                  //           Text(
+                  //             '${widget.phoneNumber}',
+                  //             style: TextStyle(
+                  //               fontSize: 13,
+                  //               color: Color(0xFF000000).withOpacity(0.8),
+                  //               fontWeight: FontWeight.w500,
+                  //               fontFamily: 'Poppins',
+                  //             ),
+                  //           ),
+                  //         ],
+                  //       ),
+                  //     ),
+                  //   ),
+                  // ),
                   SizedBox(height: 20),
                   Text(
                     'Enter Student’s Details:',
@@ -309,7 +311,9 @@ class _FormScreenState extends State<FormScreen> {
                           ),
                           keyboardType: TextInputType.emailAddress,
                           validator: (value) {
-                            if (value == null || value.isEmpty || !value.contains('@')) {
+                            if (value == null ||
+                                value.isEmpty ||
+                                !value.contains('@')) {
                               return 'Please enter a valid email address';
                             }
                             return null;
@@ -346,11 +350,13 @@ class _FormScreenState extends State<FormScreen> {
                                 value: isOverseasAdmissionChecked,
                                 onChanged: (newValue) {
                                   setState(() {
-                                    isOverseasAdmissionChecked = newValue ?? false;
+                                    isOverseasAdmissionChecked =
+                                        newValue ?? false;
                                     _resetInactivityTimer();
                                   });
                                 },
-                                controlAffinity: ListTileControlAffinity.leading,
+                                controlAffinity:
+                                    ListTileControlAffinity.leading,
                                 activeColor: Color(0xFF042628),
                               ),
                               CheckboxListTile(
@@ -370,7 +376,8 @@ class _FormScreenState extends State<FormScreen> {
                                     _resetInactivityTimer();
                                   });
                                 },
-                                controlAffinity: ListTileControlAffinity.leading,
+                                controlAffinity:
+                                    ListTileControlAffinity.leading,
                                 activeColor: Color(0xFF042628),
                               ),
                             ],
@@ -391,44 +398,23 @@ class _FormScreenState extends State<FormScreen> {
                             ),
                             child: isLoading
                                 ? CircularProgressIndicator(
-                              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                            )
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                        Colors.white),
+                                  )
                                 : Text(
-                              'Submit',
-                              style: TextStyle(
-                                fontSize: 16,
-                                color: Colors.white,
-                                fontFamily: 'Poppins',
-                              ),
-                            ),
+                                    'Submit',
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      color: Colors.white,
+                                      fontFamily: 'Poppins',
+                                    ),
+                                  ),
                           ),
                         ),
                       ],
                     ),
                   ),
                   SizedBox(height: 24),
-                  // SizedBox(
-                  //   width: double.infinity,
-                  //   height: 55,
-                  //   child: OutlinedButton(
-                  //     onPressed: () => _logoutAndNavigateToLogin(context),
-                  //     style: OutlinedButton.styleFrom(
-                  //       backgroundColor: Colors.white,
-                  //       side: BorderSide(color: Color(0xFF0FB7C6)),
-                  //       shape: RoundedRectangleBorder(
-                  //         borderRadius: BorderRadius.zero,
-                  //       ),
-                  //     ),
-                  //     child: Text(
-                  //       'Logout',
-                  //       style: TextStyle(
-                  //         fontSize: 16,
-                  //         color: Color(0xFF0FB7C6),
-                  //         fontFamily: 'Poppins',
-                  //       ),
-                  //     ),
-                  //   ),
-                  // ),
                 ],
               ),
             ),

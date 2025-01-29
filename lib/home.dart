@@ -2,7 +2,9 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:gradsgatewayconnect/lead_application_screen.dart';
 import 'package:gradsgatewayconnect/privacy_policy_screen.dart';
+import 'package:gradsgatewayconnect/splash_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'form_screen.dart';
 import 'phone_auth_screen.dart';
@@ -32,24 +34,24 @@ class _HomeScreenState extends State<HomeScreen> {
             child: Text("Cancel"),
           ),
           TextButton(
-            onPressed: () => Navigator.pop(context, true),
+            onPressed: () async {
+              // Clear SharedPreferences
+              SharedPreferences prefs = await SharedPreferences.getInstance();
+              await prefs.clear();
+
+              // Navigate to the login screen and remove all previous screens
+              Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(builder: (context) => SplashScreen()),
+                    (route) => false, // This removes all previous routes
+              );
+            },
             child: Text("Logout"),
           ),
         ],
       ),
     );
-
-    if (result == true) {
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      await prefs.clear();
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => PhoneAuthScreen()),
-      );
-    }
   }
-
-
 
 
 
@@ -62,6 +64,7 @@ class _HomeScreenState extends State<HomeScreen> {
         actions: [
           TextButton(onPressed: () => Navigator.pop(context, false), child: Text("Cancel")),
           TextButton(onPressed: () => Navigator.pop(context, true), child: Text("Delete")),
+
         ],
       ),
     );
@@ -75,22 +78,26 @@ class _HomeScreenState extends State<HomeScreen> {
 
       try {
         final response = await http.post(
-          Uri.parse("https://portal.gradsgateway.com/api/deleteaccount?name=${widget.name}&mobile=${widget.phoneNumber}"),
-
+          Uri.parse("https://portal.gradsgateway.com/api/deleteaccountnew?mobile=${widget.phoneNumber}&name=${widget.name}"),
         );
 
         if (!mounted) return; // Check widget context validity
         Navigator.pop(context); // Remove loading dialog
 
         if (response.statusCode == 200) {
-          final responseData = response.body; // Treat as plain string
-          print("Service Request Number: $responseData");
-       //  final serviceRequestNumber = responseData["serviceRequestNumber"];
-        //  final serviceRequestNumber = responseData["serviceRequestNumber"];
+          final responseData = jsonDecode(response.body); // Decode the response body into JSON
+
+          // Extract the "Message" from the response
+          final message = responseData["Message"];
+
+          print("Account Deletion Message: $message");
+
+          // Clear preferences and navigate to PhoneAuthScreen
           SharedPreferences prefs = await SharedPreferences.getInstance();
           await prefs.clear();
-          Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => PhoneAuthScreen()));
-      //    _showSuccessDialog(responseData["serviceRequestNumber"]);
+          Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => SplashScreen()));
+
+          // Display confirmation dialog
           showDialog(
             context: context,
             builder: (context) => AlertDialog(
@@ -98,22 +105,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 "Account Deletion Initiated",
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
-              content: RichText(
-                text: TextSpan(
-                  style: TextStyle(fontSize: 16, color: Colors.black),
-                  children: [
-                    TextSpan(
-                      text: "We have received Service Request No ",
-                    ),
-                    TextSpan(
-                      text: responseData.toString(), // Your dynamic service request number
-                      style: TextStyle(fontWeight: FontWeight.bold), // Bold style for the number
-                    ),
-                    TextSpan(
-                      text: " for your Account Deletion. Your account and all associated data will be removed in 7 working days. You can reach out to us at contact@gradsgateway.com for any additional information.",
-                    ),
-                  ],
-                ),
+              content: Text(
+                message, // Display the actual message content
+                style: TextStyle(fontSize: 16, color: Colors.black),
               ),
               actions: [
                 TextButton(
@@ -125,17 +119,15 @@ class _HomeScreenState extends State<HomeScreen> {
           );
         } else {
           _showErrorDialog("Failed to delete account. Please try again.");
-
         }
       } catch (e) {
         if (!mounted) return;
         Navigator.pop(context); // Remove loading dialog
         _showErrorDialog("Error deleting account: $e");
-        print("$e");
+        print("Error: $e");
       }
     }
   }
-
 
   void _showErrorDialog(String message) {
     showDialog(
@@ -156,10 +148,11 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    print('Name: ${widget.name}');
     return Scaffold(
       backgroundColor: Color(0xFFE1F5FE),
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: Color(0xFFE1F5FE),
         title: SvgPicture.asset(
           'assets/icon/gg logo.svg',
           width: 40,
@@ -186,7 +179,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   children: [
                     Icon(Icons.person,color: Colors.white,),
                     Text(
-                      widget.name ?? "User",
+                      widget.phoneNumber ?? "User",
                       style: TextStyle(color: Colors.white, fontSize: 20),
                     ),
                   ],
@@ -195,7 +188,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             ListTile(
               leading: Icon(Icons.person),
-              title: Text("Submit Referral"),
+              title: Text("New Application"),
               onTap: () {
                 Navigator.push(
                   context,
@@ -203,6 +196,21 @@ class _HomeScreenState extends State<HomeScreen> {
                     builder: (context) => FormScreen(
                       phoneNumber: widget.phoneNumber,
                       name: widget.name,
+                    ),
+                  ),
+                );
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.person),
+              title: Text("My Applications"),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) =>  LeadAndApplicationScreen(
+                      phoneNumber: widget.phoneNumber,
+
                     ),
                   ),
                 );

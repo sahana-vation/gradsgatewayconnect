@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -18,13 +20,14 @@ class _PhoneAuthScreenState extends State<PhoneAuthScreen> {
   bool _isReturningUser = false;
   bool _isLoading = true;
   bool _isSendingCode = false;
+  bool _isSignUp = false;
 
-  String? sentOtp;  // Store the sent OTP here for validation
+  String? sentOtp;
 
   @override
   void initState() {
     super.initState();
-    _phoneController.text = '+91 '; // Default to India code
+    _phoneController.text = '';
     _checkUserSession();
   }
 
@@ -47,16 +50,13 @@ class _PhoneAuthScreenState extends State<PhoneAuthScreen> {
   }
 
   Future<void> sendVerificationCode() async {
-    String phone = _phoneController.text.trim(); // Remove the leading country code or spaces
+    String phone = _phoneController.text.trim();
 
-    // Remove country code (if any) and ensure only the last 10 digits are used
     if (phone.startsWith('+91')) {
-      phone = phone.substring(3); // Remove the '+91' country code
+      phone = phone.substring(3);
     }
-
-    // Ensure that only the last 10 digits are included
     if (phone.length > 10) {
-      phone = phone.substring(phone.length - 10); // Take only the last 10 digits
+      phone = phone.substring(phone.length - 10);
     }
 
     if (phone.length < 10) {
@@ -64,42 +64,39 @@ class _PhoneAuthScreenState extends State<PhoneAuthScreen> {
       return;
     }
 
-    print('Phone: $phone');  // Print the phone number
-
     setState(() {
       _isSendingCode = true;
     });
 
-    final url = Uri.parse("https://portal.gradsgateway.com/api/mobileotp?mobile=$phone");
+    final url = Uri.parse("https://portal.gradsgateway.com/api/signin?mobile=$phone");
 
     try {
-      final response = await http.get(url);
+      final response = await http.post(url);
+      log("Response Code: ${response.statusCode}");
+      log("Response Body: ${response.body}");
+
+      final responseData = json.decode(response.body);
 
       if (response.statusCode == 200) {
-        final responseData = json.decode(response.body);
-        print('Response Data: $responseData');
-
-        // If responseData is a direct OTP value, you don't need to use ['otp']
-        sentOtp = responseData.toString();  // Convert OTP (if it's an int) to string
-        print('Sent OTP: $sentOtp');
-
-        // Navigate to OTP screen after sending code
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => OtpScreen(
-              phone: _phoneController.text, // Keep the full phone number (with country code if entered)
-              name: _nameController.text,
-              sentOtp: sentOtp,
+        if (responseData["Message"] == "Please signup before signing in.") {
+          _showErrorDialog("Please sign up before signing in.");
+        } else {
+          sentOtp = responseData.toString();
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => OtpScreen(
+                phone: _phoneController.text,
+                sentOtp: sentOtp,
+              ),
             ),
-          ),
-        );
+          );
+        }
       } else {
         _showErrorDialog('Failed to send OTP. Please try again.');
       }
     } catch (e) {
       _showErrorDialog('Error sending OTP: $e');
-      print('Error: $e');
     } finally {
       setState(() {
         _isSendingCode = false;
@@ -109,17 +106,17 @@ class _PhoneAuthScreenState extends State<PhoneAuthScreen> {
 
 
 
-
   void _showErrorDialog(String message) {
     showDialog(
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text('Error'),
+          title: Text('Alert Message'),
           content: Text(message),
           actions: [
             TextButton(
               onPressed: () {
+                Navigator.of(context).pop();
                 Navigator.of(context).pop();
               },
               child: Text('OK'),
@@ -141,7 +138,7 @@ class _PhoneAuthScreenState extends State<PhoneAuthScreen> {
     return Scaffold(
       backgroundColor: Color(0xFFE1F5FE),
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: Color(0xFFE1F5FE),
         title: SvgPicture.asset(
           'assets/icon/gg logo.svg',
           width: 40,
@@ -149,65 +146,70 @@ class _PhoneAuthScreenState extends State<PhoneAuthScreen> {
         ),
         centerTitle: true,
       ),
-      body: Column(
-        children: [
-          Expanded(
-            child: SingleChildScrollView(
-              padding: EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('Sign In', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w600)),
-                  SizedBox(height: 30),
-                  Padding(
-                    padding: EdgeInsets.all(16.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        if (!_isReturningUser)
-                          TextFormField(
-                            controller: _nameController,
-                            decoration: InputDecoration(labelText: 'Name', border: OutlineInputBorder()),
-                          ),
-                        if (!_isReturningUser) SizedBox(height: 20),
-                        TextFormField(
-
-                          maxLength: 12,
-                          keyboardType: TextInputType.number,
-                          inputFormatters: [
-                            FilteringTextInputFormatter.digitsOnly,  // Allow only digits
-                          ],
-                          enabled: !_isReturningUser,
-                          controller: _phoneController,
-    buildCounter: (BuildContext context, {int? currentLength, int? maxLength, bool? isFocused}) {
-    return null; // This hides the character counter
-    },
-                          decoration: InputDecoration(labelText: 'Enter phone number', border: OutlineInputBorder()),
-                        ),
-
-                      ],
-                    ),
-                  ),
+      body: Center(
+        child: Padding(
+          padding: EdgeInsets.all(24.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                'Sign In',
+                style: TextStyle(fontSize: 22, fontWeight: FontWeight.w600),
+              ),
+              SizedBox(height: 30),
+              TextFormField(
+                maxLength: 12,
+                keyboardType: TextInputType.number,
+                inputFormatters: [
+                  FilteringTextInputFormatter.digitsOnly,
                 ],
-              ),
-            ),
-          ),
-          Padding(
-            padding: EdgeInsets.all(16.0),
-            child: SizedBox(
-              width: MediaQuery.of(context).size.width,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF0FB7C6), // Set background color to blue
+                enabled: !_isReturningUser,
+                controller: _phoneController,
+                buildCounter: (BuildContext context,
+                    {int? currentLength, int? maxLength, bool? isFocused}) {
+                  return null;
+                },
+                decoration: InputDecoration(
+                  labelText: 'Enter phone number',
+                  border: OutlineInputBorder(),
                 ),
-                onPressed: !_isSendingCode ? sendVerificationCode : null,
-                child: _isSendingCode
-                    ? CircularProgressIndicator()
-                    : Text('Send OTP', style: TextStyle(color: Colors.white)),
               ),
-            ),
+
+              SizedBox(height: 20),
+
+
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: !_isSendingCode ? sendVerificationCode : null,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Color(0xFF042628),
+                    padding: EdgeInsets.symmetric(vertical: 15),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  ),
+                  child: _isSendingCode
+                      ? CircularProgressIndicator(color: Colors.white)
+                      : Text('Send OTP', style: TextStyle(fontSize: 16, color: Colors.white)),
+                ),
+              ),
+              // SizedBox(
+              //   width: double.infinity,
+              //   child: ElevatedButton(
+              //     style: ElevatedButton.styleFrom(
+              //       backgroundColor: Color(0xFF0FB7C6),
+              //     ),
+              //     onPressed: !_isSendingCode ? sendVerificationCode : null,
+              //     child: _isSendingCode
+              //         ? CircularProgressIndicator()
+              //         : Text(
+              //       'Send OTP',
+              //       style: TextStyle(color: Colors.white),
+              //     ),
+              //   ),
+              // ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
