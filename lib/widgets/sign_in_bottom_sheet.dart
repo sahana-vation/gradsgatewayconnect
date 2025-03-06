@@ -2,18 +2,19 @@ import 'dart:convert';
 import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:country_code_picker/country_code_picker.dart';
+import 'package:flutter/services.dart';
 import 'package:gradsgatewayconnect/widgets/sing_up_bottom_Sheet.dart';
 import 'package:http/http.dart' as http;
 
 import 'otp_bottom_sheet.dart'; // Import OTP bottom sheet
 
-void showSignInBottomSheet(BuildContext context) {
+void showSignInBottomSheet(BuildContext parentContext) {
   TextEditingController phoneController = TextEditingController();
   bool isSendingCode = false; // Flag to track API call state
   bool isChecked = false; // Track Remember Me checkbox state
 
   showModalBottomSheet(
-    context: context,
+    context: parentContext,
     isScrollControlled: true,
     shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
@@ -23,7 +24,6 @@ void showSignInBottomSheet(BuildContext context) {
         builder: (context, setState) {
           // Function to send OTP API request
           Future<void> sendVerificationCode() async {
-
             String phone = phoneController.text.trim();
 
             // Validate phone number
@@ -34,7 +34,7 @@ void showSignInBottomSheet(BuildContext context) {
               phone = phone.substring(phone.length - 10);
             }
             if (phone.length < 10) {
-              _showErrorDialog(context, 'Please enter a valid phone number');
+              _showErrorDialog(parentContext, 'Please enter a valid phone number');
               return;
             }
 
@@ -55,26 +55,29 @@ void showSignInBottomSheet(BuildContext context) {
 
               if (response.statusCode == 200) {
                 if (responseData["Message"] == "Please signup before signing in.") {
-                  _showErrorDialog(context, "Please sign up before signing in.");
+                  _showErrorDialog(parentContext, "Please sign up before signing in.");
                 } else {
                   String sentOtp = responseData.toString();
                   log("Received OTP Response: $sentOtp"); // Print OTP response
-                  Navigator.pop(context); // Close sign-in bottom sheet
-                  showOtpBottomSheet(context, phone, sentOtp);
+                  if (Navigator.canPop(context)) {
+                    Navigator.pop(context); // Close sign-in bottom sheet
+                  }
+                  showOtpBottomSheet(parentContext, phone, sentOtp);
                 }
               } else {
-                _showErrorDialog(context, 'Failed to send OTP. Please try again.');
+                _showErrorDialog(parentContext, 'Failed to send OTP. Please try again.');
               }
             } catch (e) {
               log("Error sending OTP: $e"); // Print error
-              _showErrorDialog(context, 'Error sending OTP: $e');
+              _showErrorDialog(parentContext, 'Error sending OTP: $e');
             } finally {
-              setState(() {
-                isSendingCode = false;
-              });
+              if (context.mounted) {
+                setState(() {
+                  isSendingCode = false;
+                });
+              }
             }
           }
-
 
           return Padding(
             padding: EdgeInsets.only(
@@ -104,6 +107,11 @@ void showSignInBottomSheet(BuildContext context) {
                 Text("Phone Number"),
                 SizedBox(height: 8),
                 TextField(
+                  maxLength: 10, // Limit input to 10 digits
+                  inputFormatters: [
+                    FilteringTextInputFormatter.digitsOnly, // Allow only digits
+                    LengthLimitingTextInputFormatter(10), // Limit input to 10 characters
+                  ],
                   controller: phoneController,
                   keyboardType: TextInputType.phone,
                   decoration: InputDecoration(
@@ -120,7 +128,9 @@ void showSignInBottomSheet(BuildContext context) {
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8.0),
                     ),
+                    counterText: "",
                   ),
+
                 ),
                 SizedBox(height: 10),
                 Row(
@@ -150,7 +160,7 @@ void showSignInBottomSheet(BuildContext context) {
                         borderRadius: BorderRadius.circular(8),
                       ),
                     ),
-                    onPressed:  !isSendingCode ? sendVerificationCode : null, // Disable if "Remember Me" is unchecked
+                    onPressed: !isSendingCode ? sendVerificationCode : null, // Disable if "Remember Me" is unchecked
                     child: isSendingCode
                         ? CircularProgressIndicator(color: Colors.white) // Show loader
                         : Text("Sign In", style: TextStyle(color: Colors.white)),
@@ -171,8 +181,10 @@ void showSignInBottomSheet(BuildContext context) {
                 Center(
                   child: GestureDetector(
                     onTap: () {
-                      Navigator.pop(context);
-                      showSignUpBottomSheet(context);
+                      if (Navigator.canPop(context)) {
+                        Navigator.pop(context);
+                      }
+                      showSignUpBottomSheet(parentContext);
                     },
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -199,22 +211,29 @@ void showSignInBottomSheet(BuildContext context) {
   );
 }
 
-
-// Function to show error dialog
-void _showErrorDialog(BuildContext context, String message) {
-  showDialog(
-    context: context,
-    builder: (ctx) => AlertDialog(
-      title: Text("Error"),
-      content: Text(message),
-      actions: <Widget>[
-        TextButton(
-          onPressed: () {
-            Navigator.of(ctx).pop();
-          },
-          child: Text("OK"),
-        ),
-      ],
-    ),
-  );
+// Function to show error dialog with a valid context
+void _showErrorDialog(BuildContext parentContext, String message) {
+  if (parentContext.mounted) {
+    showDialog(
+      context: parentContext,
+      builder: (ctx) => AlertDialog(
+        title: Text("Error"),
+        content: Text(message),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () {
+              if (Navigator.canPop(ctx)) {
+                Navigator.of(ctx).pop();
+              }
+            },
+            child: Text("OK"),
+          ),
+        ],
+      ),
+    );
+  }
 }
+
+
+
+

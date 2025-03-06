@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:country_code_picker/country_code_picker.dart';
+import 'package:flutter/services.dart';
 import 'package:gradsgatewayconnect/widgets/otp_bottom_sheet.dart';
+import 'package:gradsgatewayconnect/widgets/sign_in_bottom_sheet.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
-void showSignUpBottomSheet(BuildContext context) {
+void showSignUpBottomSheet(BuildContext parentContext) {
   TextEditingController emailController = TextEditingController();
   TextEditingController nameController = TextEditingController();
   TextEditingController phoneController = TextEditingController();
@@ -18,11 +20,9 @@ void showSignUpBottomSheet(BuildContext context) {
   String countryCode = '+91';
   bool isLoading = false;
 
-
-  // Declare the _showAlertDialog function above the first use
   void _showAlertDialog(String title, String message) {
     showDialog(
-      context: context,
+      context: parentContext,
       builder: (context) => AlertDialog(
         title: Text(title),
         content: Text(message),
@@ -38,7 +38,7 @@ void showSignUpBottomSheet(BuildContext context) {
 
   void _showAlreadySignedUpDialog() {
     showDialog(
-      context: context,
+      context: parentContext,
       builder: (context) => AlertDialog(
         title: Text("Already Signed Up"),
         content: Text("You are already signed up. Please sign in."),
@@ -73,12 +73,10 @@ void showSignUpBottomSheet(BuildContext context) {
     await prefs.setString('role', isStudent ? 'Student' : 'Channel Partner');
 
     if (email.isEmpty || name.isEmpty || phone.isEmpty) {
-      // Show an alert if any field is empty
       _showAlertDialog('Error', 'Please fill in all the fields.');
       return;
     }
 
-    // Remove spaces and country code, then get the last 10 digits of the phone number
     String formattedPhone = phone.replaceAll(' ', '');
     String fullPhoneNumber = formattedPhone.length > 10
         ? formattedPhone.substring(formattedPhone.length - 10)
@@ -86,41 +84,39 @@ void showSignUpBottomSheet(BuildContext context) {
 
     String apiUrl = 'https://portal.gradsgateway.com/api/signupnew?mobile=$fullPhoneNumber&name=$name&email=$email&type=$type';
 
-    // Show loader dialog
     showDialog(
-      context: context,
+      context: parentContext,
       barrierDismissible: false,
       builder: (context) => Center(child: CircularProgressIndicator()),
     );
 
     try {
       var response = await http.post(Uri.parse(apiUrl));
-      Navigator.pop(context); // Dismiss the loader dialog after request completes
+      Navigator.pop(parentContext);
       final Map<String, dynamic> responseBody = json.decode(response.body);
 
       if (response.statusCode == 200) {
         if (responseBody["Message"] == "You are already signed up. Please sign in") {
-          _showAlreadySignedUpDialog(); // Show already signed-up dialog
+          _showAlreadySignedUpDialog();
         } else {
           print("Signup Successful: $responseBody");
           String sentOtp = responseBody.toString();
-          Navigator.pop(context);
-          showOtpBottomSheet(context, phone, sentOtp);
+          Navigator.pop(parentContext);
+          showOtpBottomSheet(parentContext, phone, sentOtp);
         }
       } else {
         print("Signup Failed: ${response.body}");
         _showAlertDialog('Signup Failed', 'An error occurred while signing up. Please try again.');
       }
     } catch (e) {
-      Navigator.pop(context); // Dismiss the loader dialog if an error occurs
+      Navigator.pop(parentContext);
       print("Error: $e");
       _showAlertDialog('Error', 'An error occurred. Please check your network connection and try again.');
     }
   }
 
-
   showModalBottomSheet(
-    context: context,
+    context: parentContext,
     isScrollControlled: true,
     shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
@@ -156,7 +152,6 @@ void showSignUpBottomSheet(BuildContext context) {
                         ),
                       ),
                       SizedBox(height: 20),
-
                       Text("Select your role below:", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
                       SizedBox(height: 10),
 
@@ -201,34 +196,29 @@ void showSignUpBottomSheet(BuildContext context) {
 
                       SizedBox(height: 20),
                       Text("Email"),
-                      SizedBox(height: 4),
-
-                      TextField(controller: emailController, decoration: InputDecoration(prefixIcon:  Image.asset('assets/images/Group (5).png', width: 20, height: 20.0), hintText: "My Email", border: OutlineInputBorder())),
+                      TextField(controller: emailController, decoration: InputDecoration(hintText: "My Email", border: OutlineInputBorder())),
                       SizedBox(height: 15),
 
                       Text("Name"),
-                      SizedBox(height: 4),
-                      TextField(controller: nameController, decoration: InputDecoration(prefixIcon: Image.asset('assets/images/user.png', width: 20.83, height: 20.0), hintText: "Name", border: OutlineInputBorder())),
+                      TextField(controller: nameController, decoration: InputDecoration(hintText: "Name", border: OutlineInputBorder())),
                       SizedBox(height: 15),
 
                       Text("Phone Number"),
-                      SizedBox(height: 4),
                       TextField(
+                        maxLength: 10,
+                        inputFormatters: [
+                          FilteringTextInputFormatter.digitsOnly,
+                          LengthLimitingTextInputFormatter(10),
+                        ],
                         controller: phoneController,
                         keyboardType: TextInputType.phone,
                         decoration: InputDecoration(
-                          prefixIcon: CountryCodePicker(
-                            flagWidth: 19,
-                            onChanged: (code) => setState(() => countryCode = code.dialCode ?? '+91'),
-                            initialSelection: 'IN',
-                            favorite: ['+91'],
-                          ),
                           hintText: "Phone number",
                           border: OutlineInputBorder(),
+                          counterText: "",
                         ),
                       ),
                       SizedBox(height: 20),
-
                       Row(
                         children: [
                           Checkbox(
@@ -241,34 +231,65 @@ void showSignUpBottomSheet(BuildContext context) {
                           ),
                         ],
                       ),
-
-                      const SizedBox(height: 20),
-
+                      SizedBox(height: 20),
                       SizedBox(
                         width: double.infinity,
                         child: ElevatedButton(
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF0FB7C6),
+                            backgroundColor: Color(0xFF0FB7C6),
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(100),
+                              borderRadius: BorderRadius.circular(10),
                             ),
                           ),
-                          onPressed: (isStudent || isChannelPartner) && isPrivacyAccepted
-                              ? () async {
-                            setState(() => isLoading = true); // Show loader
-                            await signUp();
-                            setState(() => isLoading = false); // Hide loader
-                          }
-                              : null,
-                          child: isLoading
-                              ? const SizedBox(
-                            height: 20,
-                            width: 20,
-                            child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
-                          )
-                              : const Text("Sign Up", style: TextStyle(color: Colors.white)),
+              onPressed: (isStudent || isChannelPartner) && isPrivacyAccepted
+              ? () async {
+              setState(() => isLoading = true);
+              await signUp();
+              setState(() => isLoading = false);
+              }
+                  : null,
+              child: isLoading
+              ? CircularProgressIndicator(color: Colors.white, strokeWidth: 2)// Show loader
+                              : Text("Sign Up", style: TextStyle(color: Colors.white)),
                         ),
-                      )
+                      ),
+
+                      SizedBox(height: 10),
+                      Row(
+                        children: [
+                          Expanded(child: Divider()),
+                          Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 8.0),
+                            child: Text("OR"),
+                          ),
+                          Expanded(child: Divider()),
+                        ],
+                      ),
+                      SizedBox(height: 10),
+                      Center(
+                        child: GestureDetector(
+                          onTap: () {
+                            if (Navigator.canPop(context)) {
+                              Navigator.pop(context);
+                            }
+                            showSignInBottomSheet(parentContext);
+                          },
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                "Don't have an account?",
+                                style: TextStyle(color: Color(0xFF263238), fontWeight: FontWeight.bold),
+                              ),
+                              Text(
+                                " Sign In Here",
+                                style: TextStyle(color: Color(0xFF0FB7C6), fontWeight: FontWeight.bold),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: 20),
                     ],
                   ),
                 ),
@@ -280,3 +301,4 @@ void showSignUpBottomSheet(BuildContext context) {
     },
   );
 }
+

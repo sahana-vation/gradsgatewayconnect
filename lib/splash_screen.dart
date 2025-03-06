@@ -88,56 +88,62 @@ class _SplashScreenState extends State<SplashScreen> {
                   SizedBox(
                     width: 326,
                     height: 48,
-                    child: ElevatedButton(
-                      onPressed: () async {
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(100), // Ensures ripple effect follows button shape
+                      onTap: () async {
                         SharedPreferences prefs = await SharedPreferences.getInstance();
                         prefs.setBool('isLoggedIn', true); // Store login status
                         showSignInBottomSheet(context);
                       },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF0FB7C6),
-                        shape: RoundedRectangleBorder(
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF0FB7C6),
                           borderRadius: BorderRadius.circular(100),
                         ),
-                      ),
-                      child: const Text(
-                        "Sign In",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          fontFamily: "Inter",
+                        alignment: Alignment.center,
+                        child: const Text(
+                          "Sign In",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            fontFamily: "Inter",
+                          ),
                         ),
                       ),
                     ),
                   ),
+
                   const SizedBox(height: 20),
                   SizedBox(
                     width: 326,
                     height: 48,
-                    child: ElevatedButton(
-                      onPressed: () => showSignUpBottomSheet(context),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(100), // Ensures ripple effect follows button shape
+                      onTap: () => showSignUpBottomSheet(context), // Same action as the button
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white,
                           borderRadius: BorderRadius.circular(100),
-                          side: const BorderSide(
-                            color: Color(0xFF0FB7C6),
+                          border: Border.all(
+                            color: const Color(0xFF0FB7C6),
                             width: 1,
                           ),
                         ),
-                      ),
-                      child: const Text(
-                        "Sign Up",
-                        style: TextStyle(
-                          color: Color(0xFF0FB7C6),
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          fontFamily: "Inter",
+                        alignment: Alignment.center,
+                        child: const Text(
+                          "Sign Up",
+                          style: TextStyle(
+                            color: Color(0xFF0FB7C6),
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            fontFamily: "Inter",
+                          ),
                         ),
                       ),
                     ),
                   ),
+
                   const SizedBox(height: 20),
                   const Padding(
                     padding: EdgeInsets.only(left: 20),

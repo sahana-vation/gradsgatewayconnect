@@ -29,7 +29,7 @@ class _OtpBottomSheetState extends State<OtpBottomSheet> with CodeAutoFill {
   @override
   void initState() {
     super.initState();
-   // requestSmsPermission();
+    // requestSmsPermission();
     currentOtp = widget.sentOtp;
     _initInterceptor();
 
@@ -217,6 +217,7 @@ class _OtpBottomSheetState extends State<OtpBottomSheet> with CodeAutoFill {
 
   Widget otpField(BuildContext context, TextEditingController otpController) {
     return Pinput(
+      autofillHints: [AutofillHints.oneTimeCode],
       length: 4,
       controller: otpController,
       defaultPinTheme: PinTheme(

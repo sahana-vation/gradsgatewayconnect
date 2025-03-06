@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:http/http.dart' as http;
 
@@ -63,42 +64,61 @@ class _NewFormScreenState extends State<NewFormScreen> {
       };
 
       try {
-        final response = await http.post(Uri.parse(apiUrl), body: params);
+        final response = await http.post(
+          Uri.parse(apiUrl),
+          body: params,
+        );
+
+        print("Response Code: ${response.statusCode}");
+        print("Response Body: ${response.body}");
+
         final responseBody = json.decode(response.body);
 
         if (response.statusCode == 200 || response.statusCode == 201) {
-          if (responseBody['Message'] == "Lead Generated Successfully !!") {
-            showDialog(
-              context: context,
-              builder: (context) => AlertDialog(
-                title: Text('Success'),
-                content: Text('Your Application has been submitted successfully.'),
-                actions: [
-                  TextButton(
-                    child: Text('Close'),
-                    onPressed: () {
-                      Navigator.of(context).pop(); // Close the dialog
-                      Navigator.of(context).pop();
-                    },
-                  ),
-                ],
-              ),
-            );
+          if (responseBody is Map && responseBody.containsKey('Message')) {
+            String message = responseBody['Message'];
+
+            if (message == "Lead Generated Successfully !!") {
+              showDialog(
+                context: context,
+                builder: (context) => AlertDialog(
+                  title: Text('Success'),
+                  content: Text('Your Application has been submitted successfully.'),
+                  actions: [
+                    TextButton(
+                      child: Text('Close'),
+                      onPressed: () {
+                        Navigator.of(context).pop(); // Close the dialog
+                        Navigator.of(context).pop(); // Go back
+                      },
+                    ),
+                  ],
+                ),
+              );
+            } else {
+              _showSnackBar(message); // Show error message from API response
+            }
+          } else {
+            _showSnackBar('Unexpected server response');
           }
         } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Failed to generate lead.')),
-          );
+          _showSnackBar('Failed to generate lead: ${response.body}');
         }
       } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
-        );
+        _showSnackBar('Error: $e');
       } finally {
         setState(() => isLoading = false);
       }
     }
   }
+
+  void _showSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message), backgroundColor: Colors.red),
+    );
+  }
+
+
 
   @override
   void dispose() {
@@ -169,18 +189,29 @@ class _NewFormScreenState extends State<NewFormScreen> {
                       SizedBox(height: 20),
 
                       TextFormField(
+                        maxLength: 10, // Limit input to 10 digits
+                        inputFormatters: [
+                          FilteringTextInputFormatter.digitsOnly, // Allow only digits
+                          LengthLimitingTextInputFormatter(10), // Limit input to 10 characters
+                        ],
                         controller: _phoneController,
                         onChanged: (_) => _resetInactivityTimer(),
                         decoration: InputDecoration(
                           labelText: "Phone Number",
                           border: OutlineInputBorder(),
+                          counterText: "",
                         ),
+
+
                         keyboardType: TextInputType.phone,
                         validator: (value) => value!.isEmpty ? 'Enter phone number' : null,
+
                       ),
                       SizedBox(height: 20),
 
                       TextFormField(
+
+
                         controller: _emailController,
                         onChanged: (_) => _resetInactivityTimer(),
                         decoration: InputDecoration(
