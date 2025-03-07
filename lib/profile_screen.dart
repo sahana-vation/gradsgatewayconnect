@@ -52,7 +52,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 fit: BoxFit.cover,
               ),
             ),
-SizedBox(height: 20,),
+            SizedBox(height: 20,),
             /// Fixed Profile Avatar
             Positioned(
               top: 180, // Adjust as needed
@@ -78,7 +78,7 @@ SizedBox(height: 20,),
                     mainAxisAlignment: MainAxisAlignment.center, // Keeps content centered
                     children: [
                       SizedBox(height: 310,),
-                  
+
                       /// Fetch and Display User Details
                       FutureBuilder<Map<String, dynamic>>(
                         future: _fetchProfileData(),
@@ -90,7 +90,7 @@ SizedBox(height: 20,),
                           } else if (!snapshot.hasData) {
                             return Text("No profile data found");
                           }
-                  
+
                           final data = snapshot.data!;
                           return Column(
                             children: [
@@ -102,9 +102,9 @@ SizedBox(height: 20,),
                           );
                         },
                       ),
-                  
+
                       SizedBox(height: 10),
-                  
+
                       /// Custom Logout & Delete Widgets
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -114,7 +114,7 @@ SizedBox(height: 20,),
                           LogoutWidget(onLogout: () => _logout(context)),
                         ],
                       ),
-                  
+
                       SizedBox(height: 20),
                     ],
                   ),
@@ -131,10 +131,10 @@ SizedBox(height: 20,),
   /// Widget for input fields
   Widget _buildInputField(String label, String value) {
     return Container(
-      width: 326,
-      height: 68,
+      width: double.infinity,
+      constraints: BoxConstraints(minHeight: 50, maxHeight: 60), // ✅ Auto height
       margin: EdgeInsets.only(bottom: 10),
-      padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+      padding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
         color: Color(0xFFF9FAFB),
         borderRadius: BorderRadius.circular(8),
@@ -146,7 +146,7 @@ SizedBox(height: 20,),
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(label, style: TextStyle(color: Colors.grey)),
-            SizedBox(height: 5),
+            SizedBox(height: 4),
             Text(value, style: TextStyle(
                 fontWeight: FontWeight.bold, color: Colors.black)),
           ],

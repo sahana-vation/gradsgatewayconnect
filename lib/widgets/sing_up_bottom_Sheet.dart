@@ -8,6 +8,8 @@ import 'dart:convert';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../privacy_policy_screen.dart';
+
 void showSignUpBottomSheet(BuildContext parentContext) {
   TextEditingController emailController = TextEditingController();
   TextEditingController nameController = TextEditingController();
@@ -227,7 +229,12 @@ void showSignUpBottomSheet(BuildContext parentContext) {
                             activeColor: Color(0xFF0FB7C6),
                           ),
                           Expanded(
-                            child: Text("I agree with privacy policy", style: TextStyle(decoration: TextDecoration.underline, color: Color(0xFF0FB7C6))),
+                            child: GestureDetector(
+                              onTap: (){
+                                Navigator.push(context, MaterialPageRoute(builder: (context)=> PrivacyPolicyScreen()));
+
+                              },
+                                child: Text("I agree with privacy policy", style: TextStyle(decoration: TextDecoration.underline, color: Color(0xFF0FB7C6)))),
                           ),
                         ],
                       ),
