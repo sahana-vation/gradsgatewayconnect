@@ -1,0 +1,2 @@
+C:/Users/MCPL-L423/StudioProjects/GradsGateWayConnect/android/app/.cxx/RelWithDebInfo/450s1kq2/armeabi-v7a/CMakeFiles/edit_cache.dir
+C:/Users/MCPL-L423/StudioProjects/GradsGateWayConnect/android/app/.cxx/RelWithDebInfo/450s1kq2/armeabi-v7a/CMakeFiles/rebuild_cache.dir

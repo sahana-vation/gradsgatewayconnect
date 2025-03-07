@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:developer';
 import 'package:flutter/material.dart';
+import 'package:gradsgatewayconnect/privacy_policy_screen.dart';
 import 'package:gradsgatewayconnect/widgets/sing_up_bottom_Sheet.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'home.dart';
@@ -159,7 +160,8 @@ class _SplashScreenState extends State<SplashScreen> {
                   ),
                   GestureDetector(
                     onTap: () {
-                      Navigator.pushNamed(context, '/privacyPolicy');
+                      Navigator.push(context, MaterialPageRoute(builder: (context)=> PrivacyPolicyScreen()));
+
                     },
                     child: const Padding(
                       padding: EdgeInsets.only(left: 20),

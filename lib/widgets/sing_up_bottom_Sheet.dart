@@ -8,6 +8,8 @@ import 'dart:convert';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../privacy_policy_screen.dart';
+
 void showSignUpBottomSheet(BuildContext parentContext) {
   TextEditingController emailController = TextEditingController();
   TextEditingController nameController = TextEditingController();
@@ -220,17 +222,32 @@ void showSignUpBottomSheet(BuildContext parentContext) {
                       ),
                       SizedBox(height: 20),
                       Row(
-                        children: [
-                          Checkbox(
-                            value: isPrivacyAccepted,
-                            onChanged: (value) => setState(() => isPrivacyAccepted = value ?? false),
-                            activeColor: Color(0xFF0FB7C6),
-                          ),
-                          Expanded(
-                            child: Text("I agree with privacy policy", style: TextStyle(decoration: TextDecoration.underline, color: Color(0xFF0FB7C6))),
-                          ),
-                        ],
-                      ),
+                      children: [
+              Checkbox(
+              value: isPrivacyAccepted,
+              onChanged: (value) => setState(() => isPrivacyAccepted = value ?? false),
+              activeColor: Color(0xFF0FB7C6),
+              ),
+              Expanded(
+              child: GestureDetector( // Makes the text clickable
+              onTap: () {
+              Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => PrivacyPolicyScreen()), // Replace with your actual screen
+              );
+              },
+              child: Text(
+              "I agree with privacy policy",
+              style: TextStyle(
+              decoration: TextDecoration.underline,
+              color: Color(0xFF0FB7C6),
+              ),
+              ),
+              ),
+              ),
+              ],
+              ),
+
                       SizedBox(height: 20),
                       SizedBox(
                         width: double.infinity,

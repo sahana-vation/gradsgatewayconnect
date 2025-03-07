@@ -1,0 +1,20 @@
+{
+  "buildFiles": [
+    "C:\\Users\\MCPL-L423\\Downloads\\flutter_windows_3.24.1-stable\\flutter\\packages\\flutter_tools\\gradle\\src\\main\\groovy\\CMakeLists.txt"
+  ],
+  "cleanCommandsComponents": [
+    [
+      "C:\\Users\\MCPL-L423\\AppData\\Local\\Android\\Sdk\\cmake\\3.22.1\\bin\\ninja.exe",
+      "-C",
+      "C:\\Users\\MCPL-L423\\StudioProjects\\GradsGateWayConnect\\android\\app\\.cxx\\RelWithDebInfo\\450s1kq2\\x86_64",
+      "clean"
+    ]
+  ],
+  "buildTargetsCommandComponents": [
+    "C:\\Users\\MCPL-L423\\AppData\\Local\\Android\\Sdk\\cmake\\3.22.1\\bin\\ninja.exe",
+    "-C",
+    "C:\\Users\\MCPL-L423\\StudioProjects\\GradsGateWayConnect\\android\\app\\.cxx\\RelWithDebInfo\\450s1kq2\\x86_64",
+    "{LIST_OF_TARGETS_TO_BUILD}"
+  ],
+  "libraries": {}
+}
